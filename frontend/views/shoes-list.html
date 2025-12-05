@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shoes Management</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+
+    <h2>Shoes</h2>
+
+    <button id="btnAddShoe" class="btn btn-primary mb-3" style="display:none;">+ Add Shoe</button>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Sizes & Prices</th>
+            <th>Stock</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="shoesTable"></tbody>
+    </table>
+
+</div>
+
+<!-- Modal: Add/Edit Shoe -->
+<div class="modal fade" id="shoeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content p-3">
+            <h5 id="shoeModalTitle">Add Shoe</h5>
+
+            <div class="mb-2">
+                <label>Shoe Name</label>
+                <input id="shoeNameInput" class="form-control">
+            </div>
+
+            <div class="mb-2">
+                <label>Sizes & Prices</label>
+                <div id="sizesContainer"></div>
+                <button class="btn btn-sm btn-secondary" id="addSizeBtn">+ Add Size</button>
+            </div>
+
+            <div class="mb-2">
+                <label>Image URL</label>
+                <input id="shoeImageInput" class="form-control">
+            </div>
+
+            <button id="saveShoeBtn" class="btn btn-success mt-2">Save</button>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { loadShoes, createShoe, editShoe, deleteShoe } from "../assets/js/shoes.js";
+
+    const roles = (localStorage.getItem("roles")||"").split(",");
+    const isAssistant = roles.includes("ROLE_ASSISTANT");
+
+    const btnAddShoe = document.getElementById("btnAddShoe");
+    const shoesTable = document.getElementById("shoesTable");
+    const sizesContainer = document.getElementById("sizesContainer");
+
+    let editingShoeId = null;
+
+    if (isAssistant) btnAddShoe.style.display = "inline-block";
+
+    btnAddShoe.onclick = ()=>openShoeModal();
+
+    function openShoeModal(shoe=null) {
+        editingShoeId = shoe?.id||null;
+        document.getElementById("shoeModalTitle").textContent = editingShoeId?"Edit Shoe":"Add Shoe";
+        document.getElementById("shoeNameInput").value = shoe?.name||"";
+        document.getElementById("shoeImageInput").value = shoe?.imageUrl||"";
+
+        sizesContainer.innerHTML = "";
+        const sizes = shoe?.sizes || [];
+        sizes.forEach(s=>addSizeRow(s.size, s.price, s.count));
+        if(!sizes.length) addSizeRow();
+        new bootstrap.Modal(document.getElementById("shoeModal")).show();
+    }
+
+    function addSizeRow(size="", price="", count="") {
+        const div = document.createElement("div");
+        div.className = "d-flex gap-2 mb-2";
+        div.innerHTML = `
+    <input class="form-control sizeInput" placeholder="Size" value="${size}">
+    <input class="form-control priceInput" placeholder="Price" type="number" value="${price}">
+    <input class="form-control countInput" placeholder="Stock" type="number" value="${count}">
+    <button class="btn btn-sm btn-danger removeSizeBtn">X</button>
+  `;
+        div.querySelector(".removeSizeBtn").onclick = ()=>div.remove();
+        sizesContainer.appendChild(div);
+    }
+
+    document.getElementById("addSizeBtn").onclick = ()=>addSizeRow();
+
+    document.getElementById("saveShoeBtn").onclick = async () => {
+        const name = document.getElementById("shoeNameInput").value.trim();
+        const imageUrl = document.getElementById("shoeImageInput").value.trim();
+        const sizeRows = Array.from(sizesContainer.children);
+        const sizes = sizeRows.map(r=>{
+            return {
+                size: r.querySelector(".sizeInput").value,
+                price: parseFloat(r.querySelector(".priceInput").value),
+                count: parseInt(r.querySelector(".countInput").value)
+            };
+        });
+
+        if(!name || !sizes.length) { alert("Fill name and at least one size"); return; }
+
+        try {
+            if(editingShoeId){
+                await editShoe(editingShoeId,{ name, imageUrl, sizes });
+                alert("Shoe updated");
+            } else {
+                await createShoe({ name, imageUrl, sizes });
+                alert("Shoe created");
+            }
+            bootstrap.Modal.getInstance(document.getElementById("shoeModal")).hide();
+            loadAndRenderShoes();
+        } catch(err){ console.error(err); }
+    };
+
+    async function loadAndRenderShoes() {
+        const shoes = await loadShoes();
+        shoesTable.innerHTML = shoes.map(s=>{
+            const sizesHtml = s.sizes.map(sz=>`Size: ${sz.size}, Price: ${sz.price}, Stock: ${sz.count}`).join("<br>");
+            let actions = "";
+            if(isAssistant){
+                actions = `<button class="btn btn-sm btn-warning me-2" onclick="editShoeRow('${s.id}')">Edit</button>
+                 <button class="btn btn-sm btn-danger" onclick="deleteShoeRow('${s.id}')">Delete</button>`;
+            }
+            return `<tr>
+      <td>${s.name}</td>
+      <td>${sizesHtml}</td>
+      <td>${s.sizes.reduce((acc,sz)=>acc+sz.count,0)}</td>
+      <td>${s.imageUrl?`<img src="${s.imageUrl}" width="60">`:""}</td>
+      <td>${actions}</td>
+    </tr>`;
+        }).join("");
+    }
+
+    window.editShoeRow = (id)=>{
+        const shoe = JSON.parse(localStorage.getItem("allShoes")).find(s=>s.id===id);
+        if(shoe) openShoeModal(shoe);
+    };
+
+    window.deleteShoeRow = async (id)=>{
+        if(!confirm("Delete shoe?")) return;
+        await deleteShoe(id);
+        alert("Shoe deleted");
+        loadAndRenderShoes();
+    };
+
+    (async()=>{
+        const shoes = await loadShoes();
+        localStorage.setItem("allShoes", JSON.stringify(shoes));
+        loadAndRenderShoes();
+    })();
+</script>
+
+</body>
+</html>

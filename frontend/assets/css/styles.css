@@ -1,0 +1,208 @@
+/* ===========================
+   GLOBAL STYLES
+=========================== */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Card shadow */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+/* Section titles */
+h1, h2, h3, h4 {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #0d6efd;
+    border-radius: 6px;
+}
+
+.btn-danger {
+    border-radius: 6px;
+}
+
+.btn-success {
+    border-radius: 6px;
+}
+
+.btn-warning {
+    border-radius: 6px;
+}
+
+/* Input & Select */
+.form-control,
+.form-select {
+    border-radius: 6px;
+}
+
+/* ===========================
+   NAVIGATION
+=========================== */
+.navbar {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.nav-link.active {
+    font-weight: bold;
+}
+
+/* ===========================
+   TABLES
+=========================== */
+.table {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table thead th {
+    background-color: #212529;
+    color: white;
+}
+
+/* Hover effect */
+.table tbody tr:hover {
+    background-color: #f0f2f5;
+}
+
+/* ===========================
+   DASHBOARD CARDS
+=========================== */
+.dashboard-card {
+    padding: 20px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+    transition: transform .15s ease-in-out;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-3px);
+}
+
+/* ===========================
+   SHOES LIST VIEW
+=========================== */
+.shoe-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.shoe-card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: .15s;
+}
+
+.shoe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(0,0,0,.12);
+}
+
+/* Shoe title */
+.shoe-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #222;
+}
+
+/* ===========================
+   ORDER BADGES
+=========================== */
+.badge-delivered {
+    background-color: #198754;
+}
+
+.badge-pending {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-cancelled {
+    background-color: #dc3545;
+}
+
+/* ===========================
+   OFFER TAGS
+=========================== */
+.offer-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    background-color: #ff5722;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* ===========================
+   CHAT BOX
+=========================== */
+.chat-window {
+    height: 450px;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+}
+
+.chat-message {
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    max-width: 75%;
+}
+
+.chat-message-user {
+    background-color: #d1e7dd;
+    margin-left: auto;
+}
+
+.chat-message-other {
+    background-color: #e9ecef;
+    margin-right: auto;
+}
+
+/* ===========================
+   NOTIFICATIONS
+=========================== */
+.notification {
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+}
+
+.notification.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.notification.approved {
+    border-left: 4px solid #198754;
+}
+
+.notification.rejected {
+    border-left: 4px solid #dc3545;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+.footer {
+    padding: 20px;
+    text-align: center;
+    color: #777;
+    font-size: 0.9rem;
+}

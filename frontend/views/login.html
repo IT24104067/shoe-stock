@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login - ShoeStock</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card p-4 shadow">
+                <h3 class="mb-3">Login</h3>
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input id="inpUsername" class="form-control" type="text" placeholder="username" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input id="inpPassword" class="form-control" type="password" placeholder="password" />
+                </div>
+
+                <div class="d-grid">
+                    <button id="btnLogin" class="btn btn-primary">Login</button>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <small>Don't have an account? <a href="register.html">Register</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- bootstrap bundle (optional) -->
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<!-- Module: import auth helper and attach handlers -->
+<script type="module">
+    import { login } from "../assets/js/auth.js";
+    import { showAlert } from "../assets/js/utils.js";
+
+    const btn = document.getElementById("btnLogin");
+    btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("inpUsername").value.trim();
+        const password = document.getElementById("inpPassword").value.trim();
+        if (!username || !password) {
+            showAlert("Enter username and password", "warning", document.querySelector(".card"));
+            return;
+        }
+        btn.disabled = true;
+        btn.textContent = "Logging in...";
+        try {
+            await login(username, password);
+            // login() will redirect on success
+        } catch (err) {
+            // error handled inside login(); just re-enable
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Login";
+        }
+    });
+</script>
+</body>
+</html>

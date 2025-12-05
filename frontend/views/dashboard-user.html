@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+
+<div class="container py-4">
+
+    <h2>User Dashboard</h2>
+
+    <div class="row" id="cards"></div>
+
+    <hr class="my-4">
+
+    <h4>Shopping Options</h4>
+    <a href="shoes-list.html" class="btn btn-primary">Browse Shoes</a>
+    <a href="offers.html" class="btn btn-warning">View Offers</a>
+    <a href="orders.html" class="btn btn-success">My Orders</a>
+    <a href="chat.html" class="btn btn-info">Chat with Salesman</a>
+
+</div>
+
+<script type="module">
+    import { loadDashboard } from "../assets/js/dashboard.js";
+
+    async function init() {
+        const d = await loadDashboard();
+        const c = document.getElementById("cards");
+
+        c.innerHTML = `
+      <div class="col-md-6">
+        <div class="card p-3 shadow">
+          <h5>Total Orders</h5>
+          <h3>${d.myOrders}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3 shadow">
+          <h5>Active Offers</h5>
+          <h3>${d.activeOffers}</h3>
+        </div>
+      </div>
+    `;
+    }
+
+    init();
+</script>
+
+</body>
+</html>

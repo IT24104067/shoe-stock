@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orders</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <h2>Orders</h2>
+
+    <div id="lowStockAlert" class="alert alert-warning" style="display:none;"></div>
+
+    <button id="btnNewOrder" class="btn btn-primary mb-3">+ New Order</button>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>Shoe</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="ordersTable"></tbody>
+    </table>
+</div>
+
+<!-- Modal: New Order -->
+<div class="modal fade" id="orderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <h5>New Order</h5>
+
+            <div class="mb-2">
+                <label>Shoe</label>
+                <select id="shoeSelect" class="form-select"></select>
+            </div>
+
+            <div class="mb-2">
+                <label>Size</label>
+                <select id="sizeSelect" class="form-select"></select>
+            </div>
+
+            <div class="mb-2">
+                <label>Quantity</label>
+                <input id="orderQty" type="number" class="form-control" value="1">
+            </div>
+
+            <button id="placeOrderBtn" class="btn btn-success mt-2">Place Order</button>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { loadOrders, createOrder, returnOrder, loadLowStockShoes } from "../assets/js/orders.js";
+    import { loadShoes } from "../assets/js/shoes.js";
+
+    const roles = (localStorage.getItem("roles")||"").split(",");
+    const btnNewOrder = document.getElementById("btnNewOrder");
+    const ordersTable = document.getElementById("ordersTable");
+    const lowStockAlert = document.getElementById("lowStockAlert");
+
+    const shoeSelect = document.getElementById("shoeSelect");
+    const sizeSelect = document.getElementById("sizeSelect");
+    const orderQty = document.getElementById("orderQty");
+
+    let shoes = [];
+    let orders = [];
+
+    btnNewOrder.onclick = async ()=>{
+        shoes = await loadShoes();
+        shoeSelect.innerHTML = shoes.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+        populateSizes(shoes[0].id);
+        new bootstrap.Modal(document.getElementById("orderModal")).show();
+    };
+
+    shoeSelect.onchange = ()=>populateSizes(shoeSelect.value);
+
+    function populateSizes(shoeId){
+        const shoe = shoes.find(s=>s.id===shoeId);
+        if(!shoe) return;
+        sizeSelect.innerHTML = shoe.sizes.map(sz=>`<option value="${sz.size}">${sz.size} (Stock: ${sz.count})</option>`).join("");
+    }
+
+    document.getElementById("placeOrderBtn").onclick = async ()=>{
+        const shoeId = shoeSelect.value;
+        const size = sizeSelect.value;
+        const quantity = parseInt(orderQty.value);
+        if(!shoeId || !size || quantity<=0) return alert("Invalid order");
+
+        try{
+            await createOrder({shoeId, size, quantity});
+            alert("Order placed!");
+            bootstrap.Modal.getInstance(document.getElementById("orderModal")).hide();
+            await loadAndRenderOrders();
+            await checkLowStock();
+        } catch(err){ console.error(err); }
+    };
+
+    async function loadAndRenderOrders(){
+        orders = await loadOrders();
+        ordersTable.innerHTML = orders.map(o=>{
+            let actions = "";
+            if(o.status==="Delivered") actions = `<button class="btn btn-sm btn-warning" onclick="returnOrderRow('${o.id}')">Return</button>`;
+            return `<tr>
+      <td>${o.shoeName}</td>
+      <td>${o.size}</td>
+      <td>${o.quantity}</td>
+      <td>${o.price}</td>
+      <td>${o.status}</td>
+      <td>${actions}</td>
+    </tr>`;
+        }).join("");
+    }
+
+    window.returnOrderRow = async (id)=>{
+        if(!confirm("Return this order?")) return;
+        await returnOrder(id);
+        alert("Order returned, stock updated");
+        await loadAndRenderOrders();
+        await checkLowStock();
+    };
+
+    async function checkLowStock(){
+        const lowStockShoes = await loadLowStockShoes();
+        if(lowStockShoes.length){
+            lowStockAlert.style.display = "block";
+            lowStockAlert.innerHTML = `Low stock alert: ${lowStockShoes.map(s=>`${s.name} (${s.sizes.reduce((a,b)=>a+b.count,0)} left)`).join(", ")}`;
+        } else lowStockAlert.style.display = "none";
+    }
+
+    // Initial load
+    (async()=>{
+        await loadAndRenderOrders();
+        await checkLowStock();
+    })();
+</script>
+
+</body>
+</html>

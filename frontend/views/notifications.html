@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3>Notifications</h3>
+
+    <ul class="list-group mt-3" id="notifyList"></ul>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { api } from "../assets/js/api.js";
+
+    async function loadNotifications() {
+        const list = document.getElementById("notifyList");
+
+        try {
+            const data = await api.get("/notifications");
+
+            list.innerHTML = data.map(n => `
+        <li class="list-group-item">
+          <b>${n.title}</b><br>
+          <span>${n.message}</span>
+          <div class="text-muted small">${n.time}</div>
+        </li>
+      `).join("");
+
+        } catch (err) {
+            alert("Failed to load notifications");
+        }
+    }
+
+    loadNotifications();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Offers</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+
+<div class="container py-4">
+    <h2>Offers</h2>
+
+    <button id="btnCreateOffer" class="btn btn-primary mb-3" style="display:none;">+ Create Offer</button>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>Shoe</th>
+            <th>Size</th>
+            <th>Discount (%)</th>
+            <th>Valid Until</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="offersTable"></tbody>
+    </table>
+</div>
+
+<!-- Modal: Create Offer -->
+<div class="modal fade" id="offerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content p-3">
+            <h5>Create Offer</h5>
+
+            <div class="mb-2">
+                <label>Shoe</label>
+                <select id="shoeSelect" class="form-select"></select>
+            </div>
+
+            <div class="mb-2">
+                <label>Size</label>
+                <select id="sizeSelect" class="form-select"></select>
+            </div>
+
+            <div class="mb-2">
+                <label>Discount (%)</label>
+                <input type="number" id="discountInput" class="form-control" value="10">
+            </div>
+
+            <div class="mb-2">
+                <label>Valid Until</label>
+                <input type="date" id="validUntilInput" class="form-control">
+            </div>
+
+            <button id="saveOfferBtn" class="btn btn-success mt-2">Save Offer</button>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { loadOffers, createOffer, approveOffer } from "../assets/js/offers.js";
+    import { loadShoes } from "../assets/js/shoes.js";
+
+    const roles = (localStorage.getItem("roles")||"").split(",");
+    const isAssistant = roles.includes("ROLE_ASSISTANT");
+    const isManager = roles.includes("ROLE_MANAGER");
+
+    const btnCreateOffer = document.getElementById("btnCreateOffer");
+    const offersTable = document.getElementById("offersTable");
+
+    const shoeSelect = document.getElementById("shoeSelect");
+    const sizeSelect = document.getElementById("sizeSelect");
+    const discountInput = document.getElementById("discountInput");
+    const validUntilInput = document.getElementById("validUntilInput");
+
+    let shoes = [];
+
+    if(isAssistant) btnCreateOffer.style.display = "inline-block";
+
+    btnCreateOffer.onclick = async ()=>{
+        shoes = await loadShoes();
+        shoeSelect.innerHTML = shoes.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");
+        populateSizes(shoes[0].id);
+        new bootstrap.Modal(document.getElementById("offerModal")).show();
+    };
+
+    shoeSelect.onchange = ()=>populateSizes(shoeSelect.value);
+
+    function populateSizes(shoeId){
+        const shoe = shoes.find(s=>s.id===shoeId);
+        if(!shoe) return;
+        sizeSelect.innerHTML = shoe.sizes.map(sz=>`<option value="${sz.size}">${sz.size}</option>`).join("");
+    }
+
+    document.getElementById("saveOfferBtn").onclick = async ()=>{
+        const shoeId = shoeSelect.value;
+        const size = sizeSelect.value;
+        const discountPercent = parseFloat(discountInput.value);
+        const validUntil = validUntilInput.value;
+
+        if(!shoeId || !size || !discountPercent || !validUntil) return alert("Fill all fields");
+
+        try{
+            await createOffer({shoeId, size, discountPercent, validUntil});
+            alert("Offer created, pending manager approval");
+            bootstrap.Modal.getInstance(document.getElementById("offerModal")).hide();
+            loadAndRenderOffers();
+        } catch(err){ console.error(err); }
+    };
+
+    async function loadAndRenderOffers(){
+        const offers = await loadOffers();
+        offersTable.innerHTML = offers.map(o=>{
+            let actions = "";
+            if(isManager && o.status==="Pending") {
+                actions = `<button class="btn btn-sm btn-success me-2" onclick="approveOfferRow('${o.id}',true)">Approve</button>
+                 <button class="btn btn-sm btn-danger" onclick="approveOfferRow('${o.id}',false)">Reject</button>`;
+            }
+            return `<tr>
+      <td>${o.shoeName}</td>
+      <td>${o.size}</td>
+      <td>${o.discountPercent}</td>
+      <td>${o.validUntil}</td>
+      <td>${o.status}</td>
+      <td>${actions}</td>
+    </tr>`;
+        }).join("");
+    }
+
+    window.approveOfferRow = async (id, approve)=>{
+        if(!confirm(`${approve?"Approve":"Reject"} this offer?`)) return;
+        await approveOffer(id, approve);
+        alert("Offer updated");
+        loadAndRenderOffers();
+    };
+
+    // Initial load
+    loadAndRenderOffers();
+</script>
+
+</body>
+</html>

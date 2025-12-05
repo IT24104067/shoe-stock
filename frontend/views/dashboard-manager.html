@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+
+<div class="container py-4">
+    <h2 class="mb-4">Manager Dashboard</h2>
+
+    <div class="row" id="cards"></div>
+</div>
+
+
+<script type="module">
+    import { loadDashboard } from "../assets/js/dashboard.js";
+
+    async function init() {
+        const data = await loadDashboard();
+
+        const container = document.getElementById("cards");
+
+        container.innerHTML = `
+      <div class="col-md-3">
+        <div class="card shadow p-3">
+          <h5>Total Shoes</h5>
+          <h3>${data.totalShoes}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card shadow p-3">
+          <h5>Low Stock Items</h5>
+          <h3>${data.lowStock}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card shadow p-3">
+          <h5>Pending Offers</h5>
+          <h3>${data.pendingOffers}</h3>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="card shadow p-3">
+          <h5>Total Users</h5>
+          <h3>${data.totalUsers}</h3>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <h4>Quick Links</h4>
+      <a href="offers.html" class="btn btn-primary me-2">Approve Offers</a>
+      <a href="notifications.html" class="btn btn-warning me-2">Alerts</a>
+      <a href="chat.html" class="btn btn-success">Communications</a>
+    `;
+    }
+
+    init();
+</script>
+
+</body>
+</html>

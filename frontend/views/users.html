@@ -1,0 +1,166 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Users Management</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+  </head>
+  <body class="bg-light">
+
+  <div class="container py-4">
+
+    <h2>Users Management</h2>
+
+    <button id="btnAddUser" class="btn btn-primary mb-3" style="display:none;">+ Add User</button>
+
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Username</th>
+          <th>Roles</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTable"></tbody>
+    </table>
+
+  </div>
+
+  <!-- Modal: Create/Edit User -->
+  <div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content p-3">
+        <h5 id="userModalTitle">Create User</h5>
+
+        <div class="mb-2">
+          <label>Username</label>
+          <input id="usernameInput" class="form-control">
+        </div>
+
+        <div class="mb-2" id="passwordDiv">
+          <label>Password</label>
+          <input type="password" id="passwordInput" class="form-control">
+        </div>
+
+        <div class="mb-2">
+          <label>Roles</label>
+          <select multiple id="rolesInput" class="form-select">
+            <option value="ROLE_MANAGER">Manager</option>
+            <option value="ROLE_ASSISTANT">Assistant</option>
+            <option value="ROLE_SALESMAN">Salesman</option>
+            <option value="ROLE_USER">User</option>
+          </select>
+        </div>
+
+        <button id="saveUserBtn" class="btn btn-success mt-2">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+  <script type="module">
+  import { loadUsers, createUser, editUser, deleteUser } from "../assets/js/users.js";
+
+  const roles = (localStorage.getItem("roles") || "").split(",");
+  const isIT = roles.includes("ROLE_IT");
+
+  const btnAddUser = document.getElementById("btnAddUser");
+  const usersTable = document.getElementById("usersTable");
+
+  if (isIT) btnAddUser.style.display = "inline-block";
+
+  btnAddUser.onclick = () => openUserModal();
+
+  let editingUserId = null;
+
+  function openUserModal(user=null) {
+    editingUserId = user?.id || null;
+    const modalTitle = document.getElementById("userModalTitle");
+    const usernameInput = document.getElementById("usernameInput");
+    const passwordInput = document.getElementById("passwordInput");
+    const passwordDiv = document.getElementById("passwordDiv");
+    const rolesInput = document.getElementById("rolesInput");
+
+    if (editingUserId) {
+      modalTitle.textContent = "Edit User";
+      usernameInput.value = user.username;
+      passwordDiv.style.display = "none"; // cannot edit password here
+      Array.from(rolesInput.options).forEach(opt => {
+        opt.selected = user.roles.includes(opt.value);
+      });
+    } else {
+      modalTitle.textContent = "Create User";
+      usernameInput.value = "";
+      passwordInput.value = "";
+      passwordDiv.style.display = "block";
+      Array.from(rolesInput.options).forEach(opt => opt.selected = false);
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById("userModal"));
+    modal.show();
+  }
+
+  document.getElementById("saveUserBtn").onclick = async () => {
+    const username = document.getElementById("usernameInput").value.trim();
+    const password = document.getElementById("passwordInput").value.trim();
+    const rolesSelected = Array.from(document.getElementById("rolesInput").selectedOptions).map(o => o.value);
+
+    if (!username || !rolesSelected.length || (!editingUserId && !password)) {
+      alert("Fill all fields");
+      return;
+    }
+
+    try {
+      if (editingUserId) {
+        await editUser(editingUserId, { username, roles: rolesSelected });
+        alert("User updated");
+      } else {
+        await createUser({ username, password, roles: rolesSelected });
+        alert("User created");
+      }
+      bootstrap.Modal.getInstance(document.getElementById("userModal")).hide();
+      loadAndRenderUsers();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  async function loadAndRenderUsers() {
+    const users = await loadUsers();
+    usersTable.innerHTML = users.map(u => {
+      let actions = "";
+      if (isIT && !u.roles.includes("ROLE_IT")) {
+        actions = `<button class="btn btn-sm btn-warning me-2" onclick="editUserRow('${u.id}')">Edit</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteUserRow('${u.id}')">Delete</button>`;
+      }
+      return `<tr>
+                <td>${u.username}</td>
+                <td>${u.roles.join(", ")}</td>
+                <td>${actions}</td>
+              </tr>`;
+    }).join("");
+  }
+
+  // Global functions for buttons
+  window.editUserRow = (id) => {
+    const user = JSON.parse(localStorage.getItem("allUsers")).find(u=>u.id===id);
+    if(user) openUserModal(user);
+  };
+  window.deleteUserRow = async (id) => {
+    if (!confirm("Delete user?")) return;
+    await deleteUser(id);
+    alert("User deleted");
+    loadAndRenderUsers();
+  };
+
+  // Initial load
+  (async()=>{
+    const users = await loadUsers();
+    localStorage.setItem("allUsers", JSON.stringify(users));
+    loadAndRenderUsers();
+  })();
+  </script>
+
+  </body>
+  </html>

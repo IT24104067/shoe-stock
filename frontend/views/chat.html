@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Chat — ShoeStock</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css"/>
+    <style>
+        .thread-row { cursor: pointer; }
+        .thread-row.active { background: #eef6ff; }
+        .message-bubble { padding: .6rem .9rem; border-radius: 12px; margin: .4rem 0; max-width: 75%; }
+        .from-me { background: #d1e7dd; margin-left: auto; }
+        .from-them { background: #f8f9fa; margin-right: auto; }
+        .messages-area { height: 60vh; overflow-y: auto; padding: 1rem; background: #fff; border-radius: 8px; }
+    </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="mb-0">Threads</h5>
+                    <button id="btnNewThread" class="btn btn-sm btn-primary">New</button>
+                </div>
+                <div id="threadsBox" class="list-group" style="max-height:70vh; overflow-y:auto;">
+                    <!-- threads rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card p-3">
+                <div id="threadHeader" class="mb-3">
+                    <h5 id="threadSubject">Select a thread</h5>
+                    <small id="threadMeta" class="text-muted"></small>
+                </div>
+
+                <div id="messagesArea" class="messages-area mb-3">
+                    <!-- messages appended here -->
+                </div>
+
+                <div class="d-flex gap-2">
+                    <input id="msgInput" class="form-control" placeholder="Type your message..." />
+                    <button id="sendBtn" class="btn btn-success">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { loadThreads, createThread, loadThreadMessages, sendMessage, startPolling, stopPolling } from "../assets/js/chat.js";
+    import { api } from "../assets/js/api.js";
+    import { showAlert, parseJwt } from "../assets/js/utils.js";
+
+    const threadsBox = document.getElementById("threadsBox");
+    const messagesArea = document.getElementById("messagesArea");
+    const threadSubject = document.getElementById("threadSubject");
+    const threadMeta = document.getElementById("threadMeta");
+    const btnNewThread = document.getElementById("btnNewThread");
+    const sendBtn = document.getElementById("sendBtn");
+    const msgInput = document.getElementById("msgInput");
+
+    let selectedThread = null;
+    let meUsername = localStorage.getItem("username") || parseJwt(localStorage.getItem("jwtToken"))?.sub;
+
+    // Utils
+    function formatTime(ts) {
+        try { return new Date(ts).toLocaleString(); } catch { return ts; }
+    }
+
+    // Load and render threads
+    async function renderThreads() {
+        threadsBox.innerHTML = "<div class='text-center py-4 text-muted'>Loading...</div>";
+        try {
+            const threads = await loadThreads();
+            if (!threads || !threads.length) {
+                threadsBox.innerHTML = "<div class='text-center py-3 small text-muted'>No threads</div>";
+                return;
+            }
+            threadsBox.innerHTML = threads.map(t => `
+          <a class="list-group-item list-group-item-action thread-row" data-id="${t.id}">
+            <div class="d-flex justify-content-between">
+              <div><strong>${t.subject || "(no subject)"}</strong></div>
+              <small class="text-muted">${formatTime(t.lastMessageAt)}</small>
+            </div>
+            <div class="small text-muted">${t.participantsDisplay || ''}</div>
+          </a>
+        `).join("");
+            // attach handlers
+            document.querySelectorAll(".thread-row").forEach(el => {
+                el.addEventListener("click", () => selectThread(el.dataset.id));
+            });
+        } catch (err) {
+            console.error(err);
+            threadsBox.innerHTML = "<div class='text-center py-3 small text-danger'>Failed to load threads</div>";
+        }
+    }
+
+    // Select/open a thread
+    async function selectThread(threadId) {
+        // stop old polling
+        stopPolling();
+        selectedThread = threadId;
+
+        // highlight in UI
+        document.querySelectorAll(".thread-row").forEach(r => r.classList.toggle("active", r.dataset.id === threadId));
+
+        // load messages
+        messagesArea.innerHTML = "<div class='text-center text-muted py-4'>Loading messages...</div>";
+        try {
+            const msgs = await loadThreadMessages(threadId);
+            renderMessages(msgs);
+            // header
+            const thread = await api.get(`/chat/threads/${threadId}/meta`).catch(()=>null) || null;
+            threadSubject.textContent = thread?.subject || "Conversation";
+            threadMeta.textContent = thread ? `Participants: ${thread.participantsDisplay || ''}` : "";
+            // start polling for new messages
+            startPolling(threadId, (newMsgs) => {
+                // append new messages
+                if (!newMsgs || !newMsgs.length) return;
+                renderMessages(newMsgs, true);
+            });
+        } catch (err) {
+            console.error(err);
+            showAlert("Unable to open thread", "danger", document.body);
+        }
+    }
+
+    // Render messages array; if append=true, append to existing, else replace
+    function renderMessages(messages, append = false) {
+        if (!append) messagesArea.innerHTML = "";
+        messages.forEach(m => {
+            const div = document.createElement("div");
+            const fromMe = (m.senderName === meUsername) || (m.senderId === localStorage.getItem("username"));
+            div.className = "d-flex " + (fromMe ? "justify-content-end" : "justify-content-start");
+            const bubble = document.createElement("div");
+            bubble.className = "message-bubble " + (fromMe ? "from-me" : "from-them");
+            bubble.innerHTML = `<div class="small text-muted">${m.senderName || m.senderId} • ${formatTime(m.createdAt)}</div>
+                            <div>${escapeHtml(m.text)}</div>`;
+            div.appendChild(bubble);
+            messagesArea.appendChild(div);
+        });
+        // scroll to bottom
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    // escape HTML to avoid XSS
+    function escapeHtml(s) {
+        return s ? s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;") : "";
+    }
+
+    // New thread flow
+    btnNewThread.addEventListener("click", async () => {
+        // simple prompt-based creation: ask participant id(s) and subject
+        const participantsRaw = prompt("Enter participant userIds (comma separated). Salesman user ID required if user intends to message salesman.");
+        if (!participantsRaw) return;
+        const subject = prompt("Subject (optional)") || "";
+        const participantIds = participantsRaw.split(",").map(s => s.trim()).filter(Boolean);
+        try {
+            const thread = await createThread(participantIds, subject);
+            await renderThreads();
+            // open newly created thread
+            selectThread(thread.id);
+        } catch (err) {
+            console.error(err);
+            showAlert("Failed to create thread", "danger");
+        }
+    });
+
+    // Send message
+    sendBtn.addEventListener("click", async () => {
+        const text = msgInput.value.trim();
+        if (!text) return;
+        if (!selectedThread) {
+            showAlert("Please open or create a thread first", "warning", document.body);
+            return;
+        }
+        try {
+            await sendMessage(selectedThread, text);
+            msgInput.value = "";
+            // optimistic append
+            renderMessages([{ senderName: meUsername, text, createdAt: new Date().toISOString() }], true);
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // Enter key sends
+    msgInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+
+    // initial load
+    renderThreads();
+
+    // periodically refresh threads list (so new threads show)
+    setInterval(renderThreads, 10000);
+</script>
+</body>
+</html>

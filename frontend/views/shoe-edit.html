@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Shoe</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3>Edit Shoe</h3>
+
+    <form id="editForm">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input id="name" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Brand</label>
+            <input id="brand" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="desc" class="form-control"></textarea>
+        </div>
+
+        <h5>Sizes</h5>
+        <div id="sizesContainer"></div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-warning">Update</button>
+        </div>
+    </form>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { getShoeById, updateShoe } from "../assets/js/shoes.js";
+    import { showAlert } from "../assets/js/utils.js";
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    const container = document.getElementById("sizesContainer");
+
+    async function loadData() {
+        const shoe = await getShoeById(id);
+
+        document.getElementById("name").value = shoe.name;
+        document.getElementById("brand").value = shoe.brand;
+        document.getElementById("desc").value = shoe.description;
+
+        container.innerHTML = shoe.sizes.map(s => `
+      <div class="row mb-2">
+        <div class="col">
+          <input class="form-control sizeVal" value="${s.size}">
+        </div>
+        <div class="col">
+          <input class="form-control priceVal" value="${s.price}">
+        </div>
+        <div class="col">
+          <input class="form-control countVal" value="${s.count}">
+        </div>
+      </div>
+    `).join("");
+    }
+
+    loadData();
+
+    document.getElementById("editForm").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const brand = document.getElementById("brand").value;
+        const desc = document.getElementById("desc").value;
+
+        const sizeEls = [...document.querySelectorAll(".sizeVal")];
+        const priceEls = [...document.querySelectorAll(".priceVal")];
+        const countEls = [...document.querySelectorAll(".countVal")];
+
+        const sizes = sizeEls.map((el, i) => ({
+            size: el.value,
+            price: priceEls[i].value,
+            count: countEls[i].value
+        }));
+
+        await updateShoe(id, { name, brand, description: desc, sizes });
+
+        showAlert("Updated successfully", "success");
+
+        setTimeout(() => window.location.href = "shoes-list.html", 1200);
+    };
+</script>
+
+</body>
+</html>

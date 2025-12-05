@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shoe Stock — Home</title>
+
+  <!-- Bootstrap (local file expected at assets/css/bootstrap.min.css) -->
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+
+  <!-- Custom styles (optional) -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+
+  <style>
+    /* Minimal inline styles to make landing page look tidy if styles.css missing */
+    body { background: #f8f9fa; }
+    .hero { padding: 6rem 0; }
+    .feature-card { border-radius: 12px; transition: transform .15s ease; }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 10px 25px rgba(0,0,0,.08); }
+    .cta { padding: 1rem 1.2rem; border-radius: 8px; }
+    footer { padding: 2rem 0; color: #6c757d; }
+    .small-muted { color:#6c757d; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="index.html">ShoeStock</a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+        aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="views/shoes-list.html">Shop</a></li>
+          <li class="nav-item"><a class="nav-link" href="views/login.html">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="views/register.html">Register</a></li>
+          <li class="nav-item"><a class="nav-link" href="views/notifications.html">Notifications</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <main class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="display-5 fw-bold">ShoeStock — Online Shoes Stock Management</h1>
+          <p class="lead text-muted">
+            Manage shoe types, sizes, prices and inventory. Assistants add stock, salesmen handle customers, managers approve offers — everything in one place.
+          </p>
+
+          <div class="d-flex gap-2 mt-4">
+            <a href="views/login.html" class="btn btn-primary btn-lg cta">Login</a>
+            <a href="views/register.html" class="btn btn-outline-primary btn-lg cta">Create User</a>
+            <a href="views/shoes-list.html" class="btn btn-outline-secondary btn-lg cta">Browse Shoes</a>
+          </div>
+
+          <p class="small-muted mt-3">
+            Note: First time setup requires backend running (Spring Boot) at <code>http://localhost:8080</code>. Default IT admin is created by backend DataLoader (change password after first login).
+          </p>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card feature-card p-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <h5 class="mb-1">Role-based UI</h5>
+                <p class="small-muted mb-0">Manager / IT / Assistant / Salesman / User</p>
+              </div>
+              <div class="col-6">
+                <h5 class="mb-1">Stock & Offers</h5>
+                <p class="small-muted mb-0">Propose offers → Manager approves</p>
+              </div>
+              <div class="col-6">
+                <h5 class="mb-1">Image support</h5>
+                <p class="small-muted mb-0">Upload shoe images (GridFS)</p>
+              </div>
+              <div class="col-6">
+                <h5 class="mb-1">Notifications</h5>
+                <p class="small-muted mb-0">Low stock alerts & approvals</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FEATURES -->
+  <section class="py-5">
+    <div class="container">
+      <h3 class="mb-4">Main Features</h3>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="p-4 bg-white rounded-3 shadow-sm">
+            <h5>Inventory Management</h5>
+            <p class="small-muted">Add shoe types, sizes, and per-size counts & prices.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 bg-white rounded-3 shadow-sm">
+            <h5>Order Flow</h5>
+            <p class="small-muted">Users place orders. Stock updates automatically. Returns update stock.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 bg-white rounded-3 shadow-sm">
+            <h5>Role Permissions</h5>
+            <p class="small-muted">IT creates staff accounts. Manager approves offers & oversees activity.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-white">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <p class="mb-0 small-muted">© <span id="year"></span> ShoeStock — Built with Spring Boot & Bootstrap</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <small class="small-muted">Developed for your project</small>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS (optional; expects assets/js/bootstrap.bundle.min.js if local) -->
+  <script src="assets/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Quick runtime script: if JWT exists in localStorage, parse and redirect to role dashboard -->
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /**
+     * Parse JWT payload (safe client-side decode of base64)
+     * returns payload object or null
+     */
+    function parseJwt(token) {
+      try {
+        const payload = token.split('.')[1];
+        const decoded = atob(payload.replace(/-/g,'+').replace(/_/g,'/'));
+        return JSON.parse(decodeURIComponent(escape(decoded)));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // If token present in localStorage, inspect and redirect by role
+    (function tryAutoRedirect() {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) return;
+      const payload = parseJwt(token);
+      if (!payload) return;
+
+      // roles claim expected as comma-separated string (server sets "roles" claim)
+      const rolesRaw = payload.roles || payload.role || payload.authorities || '';
+      const roles = (typeof rolesRaw === 'string') ? rolesRaw.split(',') : (Array.isArray(rolesRaw) ? rolesRaw : []);
+
+      // prioritize manager first, then assistant, salesman, user
+      if (roles.includes('ROLE_MANAGER')) window.location.href = 'views/dashboard-manager.html';
+      else if (roles.includes('ROLE_IT')) window.location.href = 'views/dashboard-manager.html';
+      else if (roles.includes('ROLE_ASSISTANT')) window.location.href = 'views/dashboard-assistant.html';
+      else if (roles.includes('ROLE_SALESMAN')) window.location.href = 'views/dashboard-salesman.html';
+      else if (roles.includes('ROLE_USER')) window.location.href = 'views/dashboard-user.html';
+      // otherwise stay on landing
+    })();
+  </script>
+</body>
+</html>

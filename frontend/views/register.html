@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register - ShoeStock</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card p-4 shadow">
+                <h3 class="mb-3">Create User Account</h3>
+
+                <div class="mb-3">
+                    <label class="form-label">Display Name</label>
+                    <input id="inpDisplay" class="form-control" type="text" placeholder="John Doe" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input id="inpUsername" class="form-control" type="text" placeholder="username" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input id="inpPassword" class="form-control" type="password" placeholder="password" />
+                </div>
+
+                <div class="d-grid">
+                    <button id="btnRegister" class="btn btn-success">Create Account</button>
+                </div>
+
+                <div class="mt-3 text-center">
+                    <small>Already have an account? <a href="login.html">Login</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { registerUser } from "../assets/js/auth.js";
+    import { showAlert } from "../assets/js/utils.js";
+
+    const btn = document.getElementById("btnRegister");
+    btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("inpUsername").value.trim();
+        const password = document.getElementById("inpPassword").value.trim();
+        const display = document.getElementById("inpDisplay").value.trim();
+
+        if (!username || !password || !display) {
+            showAlert("Please fill all fields", "warning", document.querySelector(".card"));
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = "Creating...";
+        try {
+            await registerUser(username, password, display);
+            // after success show message and redirect to login after short delay
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1200);
+        } catch (err) {
+            // error shown inside registerUser
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Create Account";
+        }
+    });
+</script>
+</body>
+</html>

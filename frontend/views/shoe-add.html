@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Shoe</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h3>Add New Shoe Type</h3>
+
+    <form id="addForm">
+
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input id="name" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Brand</label>
+            <input id="brand" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea id="desc" class="form-control"></textarea>
+        </div>
+
+        <h5>Sizes</h5>
+        <div id="sizesContainer"></div>
+
+        <button type="button" id="addSize" class="btn btn-secondary mt-2">+ Add Size</button>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-success">Save Shoe</button>
+        </div>
+
+    </form>
+
+</div>
+
+<script src="../assets/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+    import { addShoe, uploadShoeImage } from "../assets/js/shoes.js";
+    import { showAlert } from "../assets/js/utils.js";
+
+    const container = document.getElementById("sizesContainer");
+
+    document.getElementById("addSize").onclick = () => {
+        const div = document.createElement("div");
+        div.className = "row mb-2";
+        div.innerHTML = `
+      <div class="col">
+        <input type="number" placeholder="Size" class="form-control sizeVal">
+      </div>
+      <div class="col">
+        <input type="number" placeholder="Price" class="form-control priceVal">
+      </div>
+      <div class="col">
+        <input type="number" placeholder="Count" class="form-control countVal">
+      </div>
+    `;
+        container.appendChild(div);
+    };
+
+    document.getElementById("addForm").onsubmit = async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const brand = document.getElementById("brand").value.trim();
+        const desc = document.getElementById("desc").value.trim();
+
+        const sizeDivs = [...document.querySelectorAll(".sizeVal")];
+        const priceDivs = [...document.querySelectorAll(".priceVal")];
+        const countDivs = [...document.querySelectorAll(".countVal")];
+
+        const sizes = sizeDivs.map((el, i) => ({
+            size: el.value,
+            price: priceDivs[i].value,
+            count: countDivs[i].value
+        }));
+
+        const body = { name, brand, description: desc, sizes };
+
+        const shoe = await addShoe(body);
+
+        showAlert("Shoe Created", "success");
+
+        setTimeout(() => {
+            window.location.href = "shoes-list.html";
+        }, 1000);
+    };
+</script>
+
+</body>
+</html>

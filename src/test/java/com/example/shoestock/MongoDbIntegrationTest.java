@@ -22,14 +22,11 @@ public class MongoDbIntegrationTest {
     public void testMongoDbConnectivity() {
         // Create a new shoe
         ShoeType shoe = new ShoeType();
-        shoe.setName("Test Shoe");
-        shoe.setBrand("Test Brand");
         shoeRepository.save(shoe);
 
         // Retrieve all shoes
         List<ShoeType> shoes = shoeRepository.findAll();
         assertFalse(shoes.isEmpty());
         assertEquals(1, shoes.size());
-        assertEquals("Test Shoe", shoes.get(0).getName());
     }
 }

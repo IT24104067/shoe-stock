@@ -20,6 +20,9 @@ public class MongoDbIntegrationTest {
 
     @Test
     public void testMongoDbConnectivity() {
+        // Clear any existing shoes first
+        shoeRepository.deleteAll();
+        
         // Create a new shoe
         ShoeType shoe = new ShoeType();
         shoeRepository.save(shoe);

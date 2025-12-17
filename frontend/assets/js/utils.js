@@ -66,3 +66,24 @@ export function getRolesFromStorage() {
     if (!rolesRaw) return [];
     return rolesRaw.split(",").map(r => r.trim()).filter(Boolean);
 }
+
+/**
+ * Require that the current user has at least one of the required roles.
+ * If missing or unauthenticated, redirect to the provided path (defaults to login).
+ */
+export function requireRoles(required = [], redirectTo = "../views/login.html") {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        window.location.href = redirectTo;
+        return false;
+    }
+    const roles = getRolesFromStorage();
+    const allowed = required.some(r => roles.includes(r));
+    if (!allowed) {
+        // Clear token to avoid redirect loops with wrong role
+        clearAuth();
+        window.location.href = redirectTo;
+        return false;
+    }
+    return true;
+}

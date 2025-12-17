@@ -6,6 +6,7 @@ import com.example.shoestock.security.JwtUtil;
 import org.springframework.security.authentication.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
@@ -43,6 +44,7 @@ public class AuthController {
     }
 
     // Create staff - only IT role (enforce via @PreAuthorize in future or call by IT token)
+    @PreAuthorize("hasAnyAuthority('ROLE_IT','ROLE_MANAGER')")
     @PostMapping("/create-staff")
     public ResponseEntity<?> createStaff(@RequestBody CreateStaffReq r) {
         if (userRepo.existsByUsername(r.username())) return ResponseEntity.badRequest().body("exists");

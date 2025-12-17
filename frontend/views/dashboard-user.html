@@ -9,8 +9,10 @@
 <body class="bg-light">
 
 <div class="container py-4">
-
-    <h2>User Dashboard</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">User Dashboard</h2>
+    <button id="btnLogout" class="btn btn-outline-danger btn-sm">Logout</button>
+  </div>
 
     <div class="row" id="cards"></div>
 
@@ -26,8 +28,12 @@
 
 <script type="module">
     import { loadDashboard } from "../assets/js/dashboard.js";
+    import { logoutAndRedirect } from "../assets/js/auth.js";
+    import { requireRoles } from "../assets/js/utils.js";
 
     async function init() {
+      if (!requireRoles(["ROLE_USER","ROLE_ASSISTANT","ROLE_SALESMAN","ROLE_MANAGER","ROLE_IT"], "../views/login.html")) return;
+      document.getElementById("btnLogout").addEventListener("click", logoutAndRedirect);
         const d = await loadDashboard();
         const c = document.getElementById("cards");
 

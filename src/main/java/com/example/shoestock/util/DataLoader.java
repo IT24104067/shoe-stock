@@ -15,15 +15,34 @@ public class DataLoader {
     @Bean
     CommandLineRunner init(UserRepository userRepo, BCryptPasswordEncoder encoder) {
         return args -> {
-            if (!userRepo.existsByUsername("itadmin")) {
-                User u = new User();
-                u.setUsername("itadmin");
-                u.setPasswordHash(encoder.encode("ChangeMe123!"));
-                u.setDisplayName("IT Admin");
-                u.setRoles(Set.of(Role.ROLE_IT));
-                userRepo.save(u);
-                System.out.println("Created default IT admin: itadmin / ChangeMe123!");
-            }
+            seedUserIfMissing(userRepo, encoder, "itadmin", "ChangeMe123!", "IT Admin", Set.of(Role.ROLE_IT));
+            seedUserIfMissing(userRepo, encoder, "manager1", "Manager@123", "Store Manager", Set.of(Role.ROLE_MANAGER));
+            seedUserIfMissing(userRepo, encoder, "salesman1", "Sales@123", "Sales Representative", Set.of(Role.ROLE_SALESMAN));
+            seedUserIfMissing(userRepo, encoder, "assistant1", "Assist@123", "Store Assistant", Set.of(Role.ROLE_ASSISTANT));
+            seedUserIfMissing(userRepo, encoder, "user1", "User@123", "Customer User", Set.of(Role.ROLE_USER));
         };
+    }
+
+    private void seedUserIfMissing(UserRepository userRepo, BCryptPasswordEncoder encoder,
+                                   String username, String rawPassword, String displayName, Set<Role> roles) {
+        var existing = userRepo.findByUsername(username);
+        if (existing.isPresent()) {
+            // If roles are missing (e.g., user was created with default USER role), ensure correct role set.
+            User u = existing.get();
+            if (u.getRoles() == null || !u.getRoles().equals(roles)) {
+                u.setRoles(roles);
+                userRepo.save(u);
+                System.out.println("Updated roles for " + username + " -> " + roles);
+            }
+            return; // Do not override passwords for existing users
+        }
+
+        User u = new User();
+        u.setUsername(username);
+        u.setPasswordHash(encoder.encode(rawPassword));
+        u.setDisplayName(displayName);
+        u.setRoles(roles);
+        userRepo.save(u);
+        System.out.println("Created default user: " + username + " / " + rawPassword);
     }
 }

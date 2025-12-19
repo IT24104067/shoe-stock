@@ -61,6 +61,12 @@
 
   <script type="module">
   import { loadUsers, createUser, editUser, deleteUser } from "../assets/js/users.js";
+  import { requireRoles } from "../assets/js/utils.js";
+
+  // Ensure only IT or Manager can open this page
+  if (!requireRoles(["ROLE_IT","ROLE_MANAGER"], "../views/login.html")) {
+    throw new Error("Unauthorized");
+  }
 
   const roles = (localStorage.getItem("roles") || "").split(",");
   const isIT = roles.includes("ROLE_IT");

@@ -1,0 +1,57 @@
+Picked up JAVA_TOOL_OPTIONS: -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.example:shoe-stock >-----------------------
+[INFO] Building shoe-stock 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.1.3:run (default-cli) > test-compile @ shoe-stock >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ shoe-stock ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ shoe-stock ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 38 source files with javac [debug release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ shoe-stock ---
+[INFO] skip non existing resourceDirectory c:\Users\pathee\Desktop\shoe-stock\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ shoe-stock ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 1 source file with javac [debug release 21] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.1.3:run (default-cli) < test-compile @ shoe-stock <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.1.3:run (default-cli) @ shoe-stock ---
+[INFO] Attaching agents: []
+Picked up JAVA_TOOL_OPTIONS: -Dstdout.encoding=UTF-8 -Dstderr.encoding=UTF-8
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.1.3)
+
+2025-12-19T11:37:17.405+05:30  INFO 26756 --- [           main] c.e.shoestock.ShoeStockApplication       : Starting ShoeStockApplication using Java 21.0.9 with PID 26756 (C:\Users\pathee\Desktop\shoe-stock\target\classes started by pathee in c:\Users\pathee\Desktop\shoe-stock)
+2025-12-19T11:37:17.406+05:30  INFO 26756 --- [           main] c.e.shoestock.ShoeStockApplication       : No active profile set, falling back to 1 default profile: "default"
+2025-12-19T11:37:18.121+05:30  INFO 26756 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2025-12-19T11:37:18.167+05:30  INFO 26756 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 6 MongoDB repository interfaces.
+2025-12-19T11:37:18.606+05:30  INFO 26756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8081 (http)
+2025-12-19T11:37:18.615+05:30  INFO 26756 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-19T11:37:18.615+05:30  INFO 26756 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.12]
+2025-12-19T11:37:18.695+05:30  INFO 26756 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-19T11:37:18.696+05:30  INFO 26756 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1252 ms
+2025-12-19T11:37:18.902+05:30  INFO 26756 --- [           main] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "4.9.1"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Oracle Corporation/21.0.9+7-LTS-338"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, streamFactoryFactory=null, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@2dba05b1], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@541afb85, com.mongodb.Jep395RecordCodecProvider@445bce9a]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='30000 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, sendBufferSize=0}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, sendBufferSize=0}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@7db40fd5], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, contextProvider=null}
+2025-12-19T11:37:18.930+05:30  INFO 26756 --- [localhost:27017] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=27, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=19632700}
+2025-12-19T11:37:19.415+05:30  INFO 26756 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: URL [file:frontend/index.html]
+2025-12-19T11:37:19.566+05:30  INFO 26756 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-12-19T11:37:19.607+05:30  INFO 26756 --- [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@38929da, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@69d667a5, org.springframework.security.web.context.SecurityContextHolderFilter@350567f1, org.springframework.security.web.header.HeaderWriterFilter@6de84336, org.springframework.web.filter.CorsFilter@7fe87c0e, org.springframework.security.web.authentication.logout.LogoutFilter@213012a0, com.example.shoestock.security.JwtAuthenticationFilter@1af677f8, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@26f75d9c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@7717b4a0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@8f4b803, org.springframework.security.web.access.ExceptionTranslationFilter@4f7bb8df, org.springframework.security.web.access.intercept.AuthorizationFilter@182e4365]
+2025-12-19T11:37:19.797+05:30  INFO 26756 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8081 (http) with context path ''
+2025-12-19T11:37:19.803+05:30  INFO 26756 --- [           main] c.e.shoestock.ShoeStockApplication       : Started ShoeStockApplication in 2.76 seconds (process running for 3.071)
+^C

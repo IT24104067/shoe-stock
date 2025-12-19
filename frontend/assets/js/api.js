@@ -1,8 +1,16 @@
 // Centralized API helper for ShoeStock frontend
 // Usage: api.get('/shoes'), api.post('/auth/login', body), api.upload('/shoes/{id}/image', file)
-// Assumes backend base URL: http://localhost:8081/api
-
-const API_BASE = "http://localhost:8081/api";
+// Build API base depending on how the page is opened
+let API_BASE = "/api";
+if (typeof window !== "undefined") {
+    const isFile = window.location.protocol === "file:";
+    if (isFile) {
+        // If opened from file://, default to local backend port
+        API_BASE = "http://localhost:8081/api";
+    } else if (window.location.origin) {
+        API_BASE = window.location.origin + "/api";
+    }
+}
 
 function getAuthToken() {
     return localStorage.getItem("jwtToken") || null;

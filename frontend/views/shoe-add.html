@@ -27,6 +27,11 @@
             <textarea id="desc" class="form-control"></textarea>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Shoe Image (optional)</label>
+            <input type="file" id="imageFile" class="form-control" accept="image/*">
+        </div>
+
         <h5>Sizes</h5>
         <div id="sizesContainer"></div>
 
@@ -44,7 +49,13 @@
 
 <script type="module">
     import { addShoe, uploadShoeImage } from "../assets/js/shoes.js";
-    import { showAlert } from "../assets/js/utils.js";
+    import { showAlert, requireRoles } from "../assets/js/utils.js";
+
+    // Only Assistant or Manager can add shoes
+    if (!requireRoles(["ROLE_ASSISTANT","ROLE_MANAGER"], "../views/login.html")) {
+        // stop script execution if not allowed
+        throw new Error("Unauthorized");
+    }
 
     const container = document.getElementById("sizesContainer");
 
@@ -77,20 +88,32 @@
         const countDivs = [...document.querySelectorAll(".countVal")];
 
         const sizes = sizeDivs.map((el, i) => ({
-            size: el.value,
-            price: priceDivs[i].value,
-            count: countDivs[i].value
-        }));
+            size: String(el.value).trim(),
+            price: Number(priceDivs[i].value),
+            count: Number(countDivs[i].value)
+        })).filter(s => s.size && !Number.isNaN(s.price) && !Number.isNaN(s.count));
 
         const body = { name, brand, description: desc, sizes };
 
-        const shoe = await addShoe(body);
+        try {
+            const shoe = await addShoe(body);
 
-        showAlert("Shoe Created", "success");
+            // Upload image if provided
+            const fileInput = document.getElementById("imageFile");
+            const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+            if (file && shoe?.id) {
+                await uploadShoeImage(shoe.id, file);
+            }
 
-        setTimeout(() => {
-            window.location.href = "shoes-list.html";
-        }, 1000);
+            showAlert("Shoe Created", "success");
+
+            setTimeout(() => {
+                window.location.href = "shoes-list.html";
+            }, 1000);
+        } catch (err) {
+            console.error(err);
+            showAlert("Failed to create shoe", "danger");
+        }
     };
 </script>
 
